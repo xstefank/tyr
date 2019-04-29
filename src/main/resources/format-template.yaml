@@ -1,6 +1,6 @@
 
-repository: "xstefank/test-repo"
-statusUrl: "https://github.com/xstefank/test-repo/blob/master/.github/pull_request_template.md"
+repository: "jboss/test-repo"
+statusUrl: "https://github.com/jboss/test-repo/blob/master/.github/pull_request_template.md"
 
 format:
   skipPatterns:
