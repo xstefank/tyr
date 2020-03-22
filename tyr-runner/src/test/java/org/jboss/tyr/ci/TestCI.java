@@ -15,7 +15,7 @@
  */
 package org.jboss.tyr.ci;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public class TestCI implements ContinuousIntegration {
 

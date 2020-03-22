@@ -15,7 +15,7 @@
  */
 package org.jboss.tyr;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 /**
  * Command that can process issue payload received from GitHub API

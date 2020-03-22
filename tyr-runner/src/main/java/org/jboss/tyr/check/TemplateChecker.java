@@ -15,6 +15,7 @@
  */
 package org.jboss.tyr.check;
 
+import jakarta.json.JsonObject;
 import org.jboss.logging.Logger;
 import org.jboss.tyr.Check;
 import org.jboss.tyr.InvalidPayloadException;
@@ -23,7 +24,6 @@ import org.jboss.tyr.model.Utils;
 import org.jboss.tyr.model.yaml.Format;
 import org.jboss.tyr.model.yaml.FormatConfig;
 
-import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 

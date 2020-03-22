@@ -15,8 +15,8 @@
  */
 package org.jboss.tyr.model;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Utils {
 
@@ -58,18 +58,19 @@ public class Utils {
     public static final String MESSAGE = "message";
     public static final String URL = "url";
 
-    public static URL getFormatUrl() throws MalformedURLException {
-        String target = System.getProperty(TEMPLATE_FORMAT_URL);
-        if (target == null)
-            target = TyrProperties.getProperty(TEMPLATE_FORMAT_URL);
-        return target != null ? new URL(target) : null;
-    }
-
     public static String getConfigDirectory() {
         String path = System.getProperty(TYR_CONFIG_DIR);
         if (path == null) {
             return System.getProperty("user.dir");
         }
         return path;
+    }
+
+    public static URI tryCreatingUri(String url) {
+        try {
+            return new URI(url);
+        } catch (URISyntaxException e) {
+            return null;
+        }
     }
 }

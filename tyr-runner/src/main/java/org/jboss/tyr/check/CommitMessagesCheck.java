@@ -15,20 +15,24 @@
  */
 package org.jboss.tyr.check;
 
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import org.jboss.tyr.Check;
 import org.jboss.tyr.InvalidPayloadException;
 import org.jboss.tyr.api.GitHubAPI;
 import org.jboss.tyr.model.Utils;
 import org.jboss.tyr.model.yaml.RegexDefinition;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import javax.inject.Inject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommitMessagesCheck implements Check {
 
     static final String DEFAULT_MESSAGE = "One of the commit messages has wrong format";
+
+    @Inject
+    GitHubAPI git;
 
     private Pattern pattern;
     private String message;
@@ -43,7 +47,7 @@ public class CommitMessagesCheck implements Check {
 
     @Override
     public String check(JsonObject payload) throws InvalidPayloadException {
-        JsonArray commitsJsonArray = GitHubAPI.getCommitsJSON(payload);
+        JsonArray commitsJsonArray = git.getCommitsJSON(payload);
         for (int i = 0; i < commitsJsonArray.size(); i++) {
             String commitMessage = commitsJsonArray.getJsonObject(i)
                     .getJsonObject(Utils.COMMIT)

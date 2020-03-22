@@ -15,17 +15,18 @@
  */
 package org.jboss.tyr.api;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.jboss.tyr.InvalidPayloadException;
 import org.jboss.tyr.model.CommitStatus;
 import org.jboss.tyr.model.StatusPayload;
-import org.jboss.tyr.model.TyrProperties;
 import org.jboss.tyr.model.Utils;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -37,14 +38,15 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.StringReader;
 import java.net.URI;
 
-import static org.jboss.tyr.model.Utils.TOKEN_PROPERTY;
-
+@ApplicationScoped
 public class GitHubAPI {
 
-    private static final String oauthToken = readToken();
     private static final Logger log = Logger.getLogger(GitHubAPI.class);
 
-    public static void updateCommitStatus(String repository, String sha, CommitStatus status,
+    @ConfigProperty(name = "github.oauth.token")
+    String oauthToken;
+
+    public void updateCommitStatus(String repository, String sha, CommitStatus status,
                                           String targetUrl, String description, String context) {
 
         Client client = ClientBuilder.newClient();
@@ -81,15 +83,15 @@ public class GitHubAPI {
         }
     }
 
-    public static JsonArray getCommitsJSON(JsonObject prPayload) throws InvalidPayloadException {
+    public JsonArray getCommitsJSON(JsonObject prPayload) throws InvalidPayloadException {
         return getJSONReader(getCommitsUri(prPayload)).readArray();
     }
 
-    public static JsonObject getPullRequestJSON(JsonObject issuePayload) throws InvalidPayloadException {
+    public JsonObject getPullRequestJSON(JsonObject issuePayload) throws InvalidPayloadException {
         return getJSONReader(getPullRequestUri(issuePayload)).readObject();
     }
 
-    static JsonReader getJSONReader(URI uri) {
+    JsonReader getJSONReader(URI uri) {
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(uri);
 
@@ -120,7 +122,7 @@ public class GitHubAPI {
         }
     }
 
-    private static URI getCommitsUri(JsonObject prPayload) throws InvalidPayloadException {
+    private URI getCommitsUri(JsonObject prPayload) throws InvalidPayloadException {
         try {
             String url = prPayload.getJsonObject(Utils.PULL_REQUEST).getString(Utils.COMMITS_URL);
             return URI.create(url);
@@ -129,17 +131,12 @@ public class GitHubAPI {
         }
     }
 
-    private static URI getPullRequestUri(JsonObject issuePayload) throws InvalidPayloadException {
+    private URI getPullRequestUri(JsonObject issuePayload) throws InvalidPayloadException {
         try {
             String url = issuePayload.getJsonObject(Utils.ISSUE).getJsonObject(Utils.PULL_REQUEST).getString(Utils.URL);
             return URI.create(url);
         } catch (NullPointerException e) {
             throw new InvalidPayloadException("Invalid payload, can't retrieve URL. ", e);
         }
-    }
-
-    private static String readToken() {
-        String token = TyrProperties.getProperty(TOKEN_PROPERTY);
-        return token == null ? System.getenv(Utils.TOKEN_ENV) : token;
     }
 }

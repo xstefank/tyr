@@ -15,11 +15,11 @@
  */
 package org.jboss.tyr.check;
 
+import jakarta.json.JsonObject;
 import org.jboss.tyr.Check;
 import org.jboss.tyr.model.Utils;
 import org.jboss.tyr.model.yaml.RegexDefinition;
 
-import javax.json.JsonObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

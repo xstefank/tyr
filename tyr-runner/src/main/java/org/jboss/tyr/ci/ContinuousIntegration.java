@@ -15,8 +15,8 @@
  */
 package org.jboss.tyr.ci;
 
+import jakarta.json.JsonObject;
 import org.jboss.tyr.InvalidPayloadException;
-import javax.json.JsonObject;
 
 public interface ContinuousIntegration {
 

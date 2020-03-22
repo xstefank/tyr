@@ -15,9 +15,9 @@
  */
 package org.jboss.tyr.additional.resource;
 
+import jakarta.json.JsonObject;
 import org.jboss.tyr.Check;
 
-import javax.json.JsonObject;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DummyAdditionalCheck implements Check {

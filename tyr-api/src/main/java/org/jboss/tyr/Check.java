@@ -15,7 +15,7 @@
  */
 package org.jboss.tyr;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 /**
  * Validates pull request payload with a specified check

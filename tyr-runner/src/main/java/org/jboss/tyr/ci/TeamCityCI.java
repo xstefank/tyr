@@ -15,15 +15,17 @@
  */
 package org.jboss.tyr.ci;
 
+import jakarta.json.JsonObject;
 import org.jboss.logging.Logger;
 import org.jboss.tyr.InvalidPayloadException;
-import org.jboss.tyr.model.TyrProperties;
+import org.jboss.tyr.model.TeamCityProperties;
 import org.jboss.tyr.model.Utils;
 import org.jboss.tyr.model.json.BuildJson;
 import org.jboss.tyr.model.json.Property;
 import org.jboss.tyr.model.json.SnapshotDependencies;
 import org.jboss.tyr.model.json.SnapshotDependency;
-import javax.json.JsonObject;
+
+import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -44,11 +46,6 @@ import java.util.Map;
 public class TeamCityCI implements ContinuousIntegration {
 
     public static final String NAME = "TeamCity";
-    public static final String HOST_PROPERTY = "teamcity.host";
-    public static final String PORT_PROPERTY = "teamcity.port";
-    public static final String USER_PROPERTY = "teamcity.user";
-    public static final String PASSWORD_PROPERTY = "teamcity.password";
-    public static final String BUILD_CONFIG = "teamcity.branch.mapping";
     public static final String BUILD_PATH = "/app/rest/buildQueue";
     public static final String SNAPSHOTDEPENDENCIES_PATH_PREFIX = "app/rest/buildTypes/id:";
     public static final String SNAPSHOTDEPENDENCIES_PATH_SUFFIX = "/snapshot-dependencies";
@@ -56,6 +53,9 @@ public class TeamCityCI implements ContinuousIntegration {
     public static final String SUCCESSFUL_BUILDS_ONLY_PROPERTY = "take-successful-builds-only";
 
     private static final Logger log = Logger.getLogger(TeamCityCI.class);
+
+    @Inject
+    TeamCityProperties properties;
 
     private String baseUrl;
     private String encryptedCredentials;
@@ -65,13 +65,9 @@ public class TeamCityCI implements ContinuousIntegration {
 
     @Override
     public void init() {
-        this.baseUrl = getBaseUrl(TyrProperties.getProperty(HOST_PROPERTY),
-                TyrProperties.getIntProperty(PORT_PROPERTY));
-
-        this.encryptedCredentials = encryptCredentials(TyrProperties.getProperty(USER_PROPERTY),
-                TyrProperties.getProperty(PASSWORD_PROPERTY));
-
-        this.branchMappings = parseBranchMapping(TyrProperties.getProperty(BUILD_CONFIG));
+        this.baseUrl = getBaseUrl(properties.getHost(), properties.getPort());
+        this.encryptedCredentials = encryptCredentials(properties.getUsername(), properties.getPassword());
+        this.branchMappings = parseBranchMapping(properties.getMapping());
 
         this.client = ClientBuilder.newClient();
 

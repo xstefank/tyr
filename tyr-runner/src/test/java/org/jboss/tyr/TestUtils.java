@@ -17,11 +17,11 @@ package org.jboss.tyr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import org.jboss.tyr.model.yaml.FormatConfig;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

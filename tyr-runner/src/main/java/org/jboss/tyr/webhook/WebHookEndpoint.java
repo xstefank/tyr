@@ -17,6 +17,8 @@ package org.jboss.tyr.webhook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import jakarta.json.JsonObject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.tyr.InvalidPayloadException;
 import org.jboss.tyr.api.GitHubAPI;
 import org.jboss.tyr.check.SkipCheck;
@@ -28,24 +30,29 @@ import org.jboss.tyr.verification.InvalidConfigurationException;
 import org.jboss.tyr.verification.VerificationHandler;
 import org.jboss.tyr.whitelist.WhitelistProcessing;
 
-import javax.json.JsonObject;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-
-import static org.jboss.tyr.model.Utils.TEMPLATE_FORMAT_FILE;
+import java.net.URI;
 
 @Path("/")
 public class WebHookEndpoint {
 
-    private static final FormatConfig config = readConfig();
-    private static final WhitelistProcessing whitelistProcessing =
-            WhitelistProcessing.IS_WHITELISTING_ENABLED ? new WhitelistProcessing(config) : null;
+    @Inject
+    GitHubAPI git;
 
+    @ConfigProperty(name = "format.config", defaultValue = "format.yaml")
+    String formatConfigLoc;
+
+    @ConfigProperty(name = "whitelist.enabled", defaultValue = "false")
+    boolean whitelistEnabled;
+
+    private final FormatConfig config = readConfig();
+    private final WhitelistProcessing whitelistProcessing = whitelistEnabled ? new WhitelistProcessing(config) : null;
     private TemplateChecker templateChecker = new TemplateChecker(config);
 
     @POST
@@ -59,19 +66,15 @@ public class WebHookEndpoint {
         }
     }
 
-    private static FormatConfig readConfig() {
+    private FormatConfig readConfig() {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         FormatConfig formatConfig;
         try {
-            URL formatFileUrl = Utils.getFormatUrl();
-            if (formatFileUrl != null)
-                formatConfig = mapper.readValue(formatFileUrl.openStream(), FormatConfig.class);
-            else {
-                String configFileName = System.getProperty(TEMPLATE_FORMAT_FILE);
-                if (configFileName == null) {
-                    configFileName = Utils.getConfigDirectory() + "/format.yaml";
-                }
-                File configFile = new File(configFileName);
+            URI formatFileUrl = Utils.tryCreatingUri(formatConfigLoc);
+            if (formatFileUrl != null) {
+                formatConfig = mapper.readValue(formatFileUrl.toURL().openStream(), FormatConfig.class);
+            } else {
+                File configFile = new File(formatConfigLoc);
                 formatConfig = mapper.readValue(configFile, FormatConfig.class);
             }
             VerificationHandler.verifyConfiguration(formatConfig);
@@ -85,7 +88,7 @@ public class WebHookEndpoint {
         if (!SkipCheck.shouldSkip(prPayload, config)) {
             String errorMessage = templateChecker.checkPR(prPayload);
             if (errorMessage != null) {
-                GitHubAPI.updateCommitStatus(config.getRepository(),
+                git.updateCommitStatus(config.getRepository(),
                         prPayload.getJsonObject(Utils.PULL_REQUEST).getJsonObject(Utils.HEAD).getString(Utils.SHA),
                         errorMessage.isEmpty() ? CommitStatus.SUCCESS : CommitStatus.ERROR,
                         config.getStatusUrl(),

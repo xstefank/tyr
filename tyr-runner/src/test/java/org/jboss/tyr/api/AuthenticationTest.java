@@ -7,6 +7,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -19,6 +20,9 @@ import java.net.URL;
 //@RunWith(Arquillian.class)
 //@RunAsClient
 public class AuthenticationTest {
+
+    @Inject
+    GitHubAPI git;
 
     private static Client restClient;
     private static final String RETURN_STATUS_UNAUTHORIZED_PATH = "/fakeGithub/ReturnStatusUnauthorized";
@@ -61,7 +65,7 @@ public class AuthenticationTest {
     }
 
     private void testAuthentication(String endpointPath) {
-        GitHubAPI.getJSONReader(UriBuilder.fromPath(deploymentUrl.toString()).path(endpointPath).build());
+        git.getJSONReader(UriBuilder.fromPath(deploymentUrl.toString()).path(endpointPath).build());
     }
 
     @AfterClass

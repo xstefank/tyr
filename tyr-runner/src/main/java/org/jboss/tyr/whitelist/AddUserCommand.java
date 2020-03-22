@@ -15,13 +15,17 @@
  */
 package org.jboss.tyr.whitelist;
 
+import jakarta.json.JsonObject;
 import org.jboss.tyr.CIOperations;
 import org.jboss.tyr.InvalidPayloadException;
 import org.jboss.tyr.api.GitHubAPI;
 
-import javax.json.JsonObject;
+import javax.inject.Inject;
 
 public class AddUserCommand extends AbstractCommand {
+
+    @Inject
+    GitHubAPI git;
 
     @Override
     public void process(JsonObject payload, CIOperations operations) throws InvalidPayloadException {
@@ -32,7 +36,7 @@ public class AddUserCommand extends AbstractCommand {
                 !operations.isUserAlreadyWhitelisted(pullRequestAuthor) &&
                 operations.addUserToUserList(pullRequestAuthor)) {
 
-            JsonObject prPayload = GitHubAPI.getPullRequestJSON(payload);
+            JsonObject prPayload = git.getPullRequestJSON(payload);
             operations.triggerCI(prPayload);
         }
     }

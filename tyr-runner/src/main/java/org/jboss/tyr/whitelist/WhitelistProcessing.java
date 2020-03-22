@@ -15,6 +15,8 @@
  */
 package org.jboss.tyr.whitelist;
 
+import jakarta.json.JsonObject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.tyr.CIOperations;
 import org.jboss.tyr.Command;
 import org.jboss.logging.Logger;
@@ -23,21 +25,19 @@ import org.jboss.tyr.ci.CILoader;
 import org.jboss.tyr.ci.ContinuousIntegration;
 import org.jboss.tyr.model.AdditionalResourcesLoader;
 import org.jboss.tyr.model.PersistentList;
-import org.jboss.tyr.model.TyrProperties;
 import org.jboss.tyr.model.Utils;
 import org.jboss.tyr.model.yaml.FormatConfig;
 
-import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class WhitelistProcessing implements CIOperations {
 
-    public static final boolean IS_WHITELISTING_ENABLED =
-            TyrProperties.getBooleanProperty(Utils.WHITELIST_ENABLED);
-
     private static final Logger log = Logger.getLogger(WhitelistProcessing.class);
+
+    @ConfigProperty(name = "user.names.dir", defaultValue = ".")
+    String dirName;
 
     private final List<String> userList;
     private final List<String> adminList;
@@ -46,7 +46,6 @@ public class WhitelistProcessing implements CIOperations {
     private final List<ContinuousIntegration> continuousIntegrations;
 
     public WhitelistProcessing(FormatConfig config) {
-        String dirName = Utils.getConfigDirectory();
         userList = new PersistentList(dirName, Utils.USERLIST_FILE_NAME);
         adminList = new PersistentList(dirName, Utils.ADMINLIST_FILE_NAME);
         commands = getCommands(config);

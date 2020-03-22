@@ -15,10 +15,9 @@
  */
 package org.jboss.tyr.additional.resource;
 
+import jakarta.json.JsonObject;
 import org.jboss.tyr.Command;
 import org.jboss.tyr.CIOperations;
-
-import javax.json.JsonObject;
 
 public class DummyAdditionalCommand implements Command {
 
