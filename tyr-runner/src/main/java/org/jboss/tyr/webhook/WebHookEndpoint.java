@@ -30,6 +30,8 @@ import org.jboss.tyr.verification.InvalidConfigurationException;
 import org.jboss.tyr.verification.VerificationHandler;
 import org.jboss.tyr.whitelist.WhitelistProcessing;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.net.URI;
 
 @Path("/")
+@ApplicationScoped
 public class WebHookEndpoint {
 
     @Inject
@@ -51,9 +54,16 @@ public class WebHookEndpoint {
     @ConfigProperty(name = "whitelist.enabled", defaultValue = "false")
     boolean whitelistEnabled;
 
-    private final FormatConfig config = readConfig();
-    private final WhitelistProcessing whitelistProcessing = whitelistEnabled ? new WhitelistProcessing(config) : null;
-    private TemplateChecker templateChecker = new TemplateChecker(config);
+    private FormatConfig config;
+    private WhitelistProcessing whitelistProcessing;
+    private TemplateChecker templateChecker;
+
+    @PostConstruct
+    public void init() {
+        config = readConfig();
+        whitelistProcessing = whitelistEnabled ? new WhitelistProcessing(config) : null;
+        templateChecker = new TemplateChecker(config);
+    }
 
     @POST
     @Path("/pull-request")
